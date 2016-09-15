@@ -260,19 +260,6 @@ def run_threaded(iterator):
     q.join()
 
 if __name__ == "__main__":
-    try:
-        conn = MySQL.connect(host=DB['host'],
-                             user=DB['username'],
-                             passwd=DB['password'],
-                             db=DB['dbname'],
-                             charset=DB['charset'])
-        cur = conn.cursor()
-        cur.execute('drop table %s'%DB['variants_table'])
-        cur.execute(DDL)
-        cur.close()
-        conn.close()
-    except:
-        pass
     run_threaded(test_urls)
     #save_variants(test_urls[1], write_to_db)
 
