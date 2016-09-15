@@ -197,36 +197,44 @@ def write_to_csv(rows, filename):
     for r in rows:
         writer.writerow(r)
 
+def db_wrap(f):
+    """Init/deinit Mysql connection and add cursor ass the first argument to function"""
+    def func(*args, **kwargs):
+        try:
+            conn = MySQL.connect(host=DB['host'], 
+                                 user=DB['username'], 
+                                 passwd=DB['password'],
+                                 db=DB['dbname'],
+                                 charset=DB['charset'])
+            cur = conn.cursor()
+            new_args = list(args)
+            new_args.insert(0, cur)
+            res = f(*new_args, **kwargs)
+            conn.commit()
+            return res
+        except:
+            try:
+                conn.rollback()
+            except:
+                pass
+            raise
+        finally:
+            try:
+                cur.close()
+            except:
+                pass
+            try:
+                conn.close()
+            except:
+                pass
+    return func
 
-def write_to_db(rows):
-    conn = None
-    try:
-        conn = MySQL.connect(host=DB['host'],
-                             user=DB['username'],
-                             passwd=DB['password'],
-                             db=DB['dbname'],
-                             charset=DB['charset'])
-        cur = conn.cursor()
-        cols = ",".join(fieldnames)
-        vals = ",".join(map(lambda x: "%("+x+")s", fieldnames))
-        for r in rows:
-            cur.execute("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), r)
-        conn.commit()
-    except:
-        try:
-            conn.rollback()
-        except:
-            pass
-        raise
-    finally:
-        try:
-            cur.close()
-        except:
-            pass
-        try:
-            conn.close()
-        except:
-            pass
+@db_wrap
+def write_to_db(cur, rows):
+    cols = ",".join(fieldnames)
+    vals = ",".join(map(lambda x: "%("+x+")s", fieldnames))
+    for r in rows:
+        cur.execute("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), r)
 
 def save_variants(url, writer):
     _logger.info("Start process URL %s" % url)
@@ -259,7 +267,12 @@ def run_threaded(iterator):
 
     q.join()
 
+
+@db_wrap
+def get_urls(cur):
+    #TODO: write SELECT from table with urls
+    return test_urls
+
 if __name__ == "__main__":
-    run_threaded(test_urls)
-    #save_variants(test_urls[1], write_to_db)
+    run_threaded(get_urls())
 
