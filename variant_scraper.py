@@ -1,6 +1,5 @@
 import re
 import json
-#import urllib2
 import requests
 from BeautifulSoup import BeautifulSoup
 import csv
@@ -90,9 +89,6 @@ class AliProductScraper(object):
         self.url = url
 
         response = requests.get(self.url, timeout=HTTP_TIMEOUT_SEC, cookies={'aep_usuc_f': 'region=US&site=glo&b_locale=en_US&c_tp=USD'})
-        #opener = urllib2.build_opener()
-        #opener.addheaders.append(('Cookie', 'aep_usuc_f="region=US&site=glo&b_locale=en_US&c_tp=USD"'))
-        #response = opener.open(self.url, None, HTTP_TIMEOUT_SEC)
         html = response.text
         #print html
         self.soup = BeautifulSoup(html)
