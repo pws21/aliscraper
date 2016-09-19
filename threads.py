@@ -26,7 +26,7 @@ class Worker(Thread):
             try:
                 save_variants(url, write_to_db)
                 logger.info("URL %s OK" % url)
-            except (requests.ReadTimeout, socks.GeneralProxyError, ServiceUnavailable) as e:
+            except (requests.ReadTimeout, socks.GeneralProxyError, ServiceUnavailable, requests.ConnectionError) as e:
                 self.change_identity()
             except NotProductPage, e:
                 logger.error("URL %s is not a Product page" % url)
