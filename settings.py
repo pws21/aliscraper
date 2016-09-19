@@ -13,7 +13,7 @@ DDL = """create table if not exists %s(
                 variant_title varchar(1000),
                 shipping_cost decimal(10,2))""" % DB['variants_table']
 
-HTTP_TIMEOUT_SEC = 5
+HTTP_TIMEOUT_SEC = 3
 
 test_urls = ['https://www.aliexpress.com/item/2015-New-sneakers-women-outdoor-sport-shoes-summer-breathable-mesh-running-shoes-white-light-casual-shoes/32319495269.html?spm=2114.01010208.3.11.52x5UF&ws_ab_test=searchweb201556_10,searchweb201602_4_10057_10065_10056_10055_10054_10069_10059_10058_10017_10070_10060_10061_10052_10062_10053_10050_10051,searchweb201603_2&btsid=37c9b998-c074-4778-97f5-e1482f3e2d31',
              'https://www.aliexpress.com/store/product/Woman-Winter-Velvet-Warm-velvet-dress-with-long-sleeves-shift-brieft-Pleat-Knee-Length-Office-work/312854_2052999664.html?spm=a2g01.8005228.0.31.264FrC&sdom=562.108230.97211.0_2052999664',

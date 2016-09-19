@@ -2,7 +2,9 @@ from scrapers import ServiceUnavailable, NotProductPage, AliProductScraper
 from helpers import save_variants, write_to_db
 from flask import Flask, request, abort
 import json
-from threads import run_one
+from threads import run_one, TorConnection, get_variants_fast
+from settings import *
+import random
 
 app = Flask(__name__)
 
@@ -22,9 +24,9 @@ def sample():
     url = request.args.get('url')
     data = []
     def fake_writer(rows):
-        data = rows
+        pass
     try:
-        run_one(url, fake_writer)
+        data = get_variants_fast(url, TorConnection(TOR_BASE_PORT + random.randint(0,NUM_TORS)))
         #scraper = AliProductScraper(url)
         #rows = scraper.get_variants()
         return json.dumps(data, ensure_ascii=False)

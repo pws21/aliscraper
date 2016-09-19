@@ -62,7 +62,10 @@ class AliShippingScraper(object):
             return '' if s is None else str(s)
 
         url = 'https://freight.aliexpress.com/ajaxFreightCalculateService.htm?callback=jQuery&f=d&productid=%s&count=1&currencyCode=%s&sendGoodsCountry=&country=%s&province=%s&city=%s&abVersion=1&_=1473792174531' % (product_id, currency, xstr(self.country), xstr(self.province), xstr(self.city))
-        response = http_get(url, proxy=proxy)
+        if proxy:
+            response = proxy.get(url)
+        else:
+            response = http_get(url)
         self.content = response
 
     def get_price(self):
@@ -74,20 +77,25 @@ class AliShippingScraper(object):
 
 def http_get(url, cookies=None, proxy='localhost:9050', headers={}):
     response = requests.get(url, timeout=HTTP_TIMEOUT_SEC, cookies=cookies,
-                            proxies=dict(http='socks5://%s' % proxy, https='socks5://%s' % proxy), headers=headers)
+                            #proxies=dict(http='socks5://%s' % proxy, https='socks5://%s' % proxy), 
+                            headers=headers)
     return response.text
 
 
 class AliProductScraper(object):
     def __init__(self, url, proxy):
         self.url = url
+        self.proxy = proxy
         #_tor.new_identity()
         headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Encoding': 'gzip,deflate',
             'Accept-Language': 'en-US,en;q=0.8',
             'Cache-Control': 'max-age=0',
             'Connection': 'keep-alive','user-agent': 'Googlebot/2.1'}
-        response = http_get(self.url, cookies={'aep_usuc_f': 'region=US&site=glo&b_locale=en_US&c_tp=USD'}, proxy=proxy, headers=headers)
+        if proxy:
+            response = proxy.get(self.url, cookies={'aep_usuc_f': 'region=US&site=glo&b_locale=en_US&c_tp=USD'}, headers=headers)
+        else:
+            response = http_get(self.url, cookies={'aep_usuc_f': 'region=US&site=glo&b_locale=en_US&c_tp=USD'}, headers=headers)
         #html = response.text
         #print html
         self.soup = BeautifulSoup(response)
