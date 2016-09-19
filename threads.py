@@ -42,7 +42,7 @@ class TorConnection(object):
         else:
             self.proxy_port = port
         self.ctl_port = self.proxy_port - 934
-        # print "Set Tor ports %s/%s" % (self.proxy_port, self.ctl_port)
+         print "Set Tor ports %s/%s" % (self.proxy_port, self.ctl_port)
         self.tor_control = Controller.from_port(port=self.ctl_port)
 
     def set_timeout(self, timeout):
@@ -129,14 +129,10 @@ class Worker(Thread):
         while not self.queue.empty():
             url = self.queue.get()
             try:
-                #save_variants(url, self.writer)
-                #scraper = AliProductScraper(url, proxy=self.proxy.get_proxy())
                 self.result = get_variants_proxified(url, self.proxy)
                 self.writer(self.result)
                 logger.info("URL %s OK" % url)
                 time.sleep(1)
-            #except (requests.ReadTimeout, socks.GeneralProxyError, ServiceUnavailable, requests.ConnectionError) as e:
-            #    self.proxy.change_identity()
             except ServiceUnavailable, e:
                 self.queue.put(url)
                 self.proxy.change_identity()
