@@ -1,5 +1,8 @@
-from variant_scraper import *
+from scrapers import ServiceUnavailable, NotProductPage, AliProductScraper
+from helpers import save_variants, write_to_db
 from flask import Flask, request, abort
+import json
+from threads import run_one
 
 app = Flask(__name__)
 
@@ -7,7 +10,7 @@ app = Flask(__name__)
 def update_db():
     url = request.args.get('url')
     try:
-        save_variants(url, write_to_db)
+        run_one(url, write_to_db)
         return json.dumps({"result": "OK"})
     except NotProductPage:
         abort(422)
@@ -17,10 +20,14 @@ def update_db():
 @app.route("/sample")
 def sample():
     url = request.args.get('url')
+    data = []
+    def fake_writer(rows):
+        data = rows
     try:
-        scraper = AliProductScraper(url)
-        rows = scraper.get_variants()
-        return json.dumps(rows, ensure_ascii=False)
+        run_one(url, fake_writer)
+        #scraper = AliProductScraper(url)
+        #rows = scraper.get_variants()
+        return json.dumps(data, ensure_ascii=False)
     except NotProductPage:
         abort(422)
     except ServiceUnavailable:

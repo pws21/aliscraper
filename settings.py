@@ -35,3 +35,6 @@ LOGFILE = 'log.log'
 LOGFMT = '%(asctime)s - [%(levelname)s] - %(message)s'
 LOGLEVEL = logging.INFO
 
+NUM_TORS = 10
+TOR_BASE_PORT=9052
+

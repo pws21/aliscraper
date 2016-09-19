@@ -1,3 +1,4 @@
+import random
 import time
 from threading import Thread
 from threading import active_count as threading_active_count
@@ -13,18 +14,19 @@ from scrapers import ServiceUnavailable, NotProductPage
 
 
 class Worker(Thread):
-    def __init__(self, queue, proxy_port):
+    def __init__(self, queue, proxy_port, writer=write_to_db):
         Thread.__init__(self)
         self.queue = queue
         self.proxy_port = proxy_port
         self.identity_counter = 0
+        self.writer = writer
         self.tor_control = Controller.from_port(port=proxy_port-934)
 
     def run(self):
         while not self.queue.empty():
             url = self.queue.get()
             try:
-                save_variants(url, write_to_db)
+                save_variants(url, self.writer)
                 logger.info("URL %s OK" % url)
             except (requests.ReadTimeout, socks.GeneralProxyError, ServiceUnavailable, requests.ConnectionError) as e:
                 self.change_identity()
@@ -41,6 +43,7 @@ class Worker(Thread):
         self.tor_control.signal(Signal.NEWNYM)
         self.identity_counter += 1
         #time.sleep(1)
+
 
 class Monitor(Thread):
     def __init__(self, queue, workers):
@@ -59,14 +62,15 @@ class Monitor(Thread):
             for w in self.workers:
                 print "Worker on port %s - %s" % (w.proxy_port, w.identity_counter)
 
-def run_threaded(iterator):
+
+def run_all(iterator):
     q = Queue.LifoQueue()
     for url in iterator:
         q.put(url)
 
     workers = []
-    for i in range(10):
-        w = Worker(q, 9052 + i)
+    for i in range(NUM_TORS):
+        w = Worker(q, TOR_BASE_PORT + i)
         workers.append(w)
 
     for w in workers:
@@ -78,5 +82,14 @@ def run_threaded(iterator):
     q.join()
     mon.finish()
 
+
+def run_one(url, writer):
+    q = Queue.LifoQueue()
+    q.put(url)
+    w = Worker(q, TOR_BASE_PORT + random.randint(0,NUM_TORS), writer)
+    w.start()
+    q.join()
+
+
 if __name__ == "__main__":
-    run_threaded(get_urls())
+    run_all(get_urls())
