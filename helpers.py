@@ -10,15 +10,6 @@ _handler = logging.FileHandler(LOGFILE)
 _handler.setFormatter(_fmt)
 logger.addHandler(_handler)
 
-
-class NotProductPage(Exception):
-    pass
-
-
-class ServiceUnavailable(Exception):
-    pass
-
-
 fieldnames = ["product_id",
               "product_title",
               "product_price",

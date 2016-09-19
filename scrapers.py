@@ -3,7 +3,14 @@ import json
 import requests
 from BeautifulSoup import BeautifulSoup
 from settings import *
-from helpers import ServiceUnavailable, NotProductPage
+
+class NotProductPage(Exception):
+    pass
+
+
+class ServiceUnavailable(Exception):
+    pass
+
 
 class Property(object):
     def __init__(self, id, title, img=None):

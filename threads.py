@@ -9,6 +9,7 @@ import socks
 import traceback
 import sys
 import requests
+from scrapers import ServiceUnavailable, NotProductPage
 
 
 class Worker(Thread):
