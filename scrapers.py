@@ -142,7 +142,7 @@ class AliProductScraper(object):
 
                 # price calculation
                 min_price = self.find_pattern('window.runParams.actMinPrice=\"([0-9\.]+)\"', self.js)
-                max_price = self.find_pattern('window.runParams.actMaxPrice=\"(0-9\.+)\"', self.js)
+                max_price = self.find_pattern('window.runParams.actMaxPrice=\"([0-9\.]+)\"', self.js)
                 if min_price is None:
                     min_price = self.find_pattern('window.runParams.minPrice=\"([0-9\.]+)\"', self.js)
                     max_price = self.find_pattern('window.runParams.maxPrice=\"([0-9\.]+)\"', self.js)

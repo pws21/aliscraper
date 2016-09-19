@@ -2,7 +2,9 @@ from scrapers import ServiceUnavailable, NotProductPage, AliProductScraper
 from helpers import save_variants, write_to_db
 from flask import Flask, request, abort
 import json
-from threads import run_one, TorConnection, get_variants_fast
+from threads import  get_variants_fast
+from tor import TorConnection
+from settings import TOR_BASE_PORT
 
 app = Flask(__name__)
 
@@ -24,7 +26,9 @@ def update_db():
 def sample():
     url = request.args.get('url')
     try:
-        data = get_variants_fast(url, TorConnection(proxy_port=None))
+        tor = TorConnection(proxy_port=None)
+        data = get_variants_fast(url, tor)
+        print tor
         return json.dumps(data, ensure_ascii=False)
     except NotProductPage:
         abort(422)
