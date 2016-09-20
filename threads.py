@@ -11,18 +11,19 @@ import socks
 import traceback
 import sys
 import requests
-from scrapers import ServiceUnavailable, NotProductPage
+from scrapers import ServiceUnavailable, NotProductPage, AliProductScraper
 import datetime
-from tor import TorConnection
+from tor import TorConnection, NoMoreRetry
 
 
-def get_variants_proxified(url, tor):
+def get_variants_hard(url, tor):
     for i in range(5):
         try:
             scraper = AliProductScraper(url, proxy=tor)
             return scraper.get_variants()
         except (requests.ReadTimeout, socks.GeneralProxyError, ServiceUnavailable, requests.ConnectionError) as e:
             tor.change_identity_wait()
+                
     raise ServiceUnavailable
 
 def get_variants_fast(url, tor):
@@ -43,26 +44,46 @@ class Worker(Thread):
         self.proxy = TorConnection(proxy_port)
         self.writer = writer
         self.result = None
+        self.stat = {}
+        self.state = 'FREE'
+        self.running = True
+
+    def finish(self):
+        self.running = False
+        self.state='STOP'
 
     def run(self):
-        while not self.queue.empty():
-            url = self.queue.get()
+        while self.running:
             try:
-                self.result = get_variants_proxified(url, self.proxy)
-                self.writer(self.result)
-                logger.info("URL %s OK" % url)
-                time.sleep(2)
-            except ServiceUnavailable, e:
-                self.queue.put(url)
-                self.proxy.change_identity()
-                time.sleep(3)
-            except NotProductPage, e:
-                logger.error("URL %s is not a Product page" % url)
-            except Exception, e:
-                logger.error("URL %s error" % url)
-                traceback.print_exc(file=sys.stdout)
-            self.queue.task_done()
-            #time.sleep(2)
+                url = self.queue.get(False)
+                try:
+                    self.state = 'WORK'
+                    self.result = get_variants_hard(url, self.proxy)
+                    self.writer(self.result)
+                    logger.info("URL %s OK" % url)
+                    self.stat['ok'] = self.stat.get('ok', 0) + 1
+                    time.sleep(1)
+                except (ServiceUnavailable, NoMoreRetry), e:
+                    self.queue.put(url)
+                    self.proxy.change_identity()
+                    self.stat['err'] = self.stat.get('err', 0) + 1
+                    self.state = 'WAIT'
+                    time.sleep(2)
+                except NotProductPage, e:
+                    self.stat['err'] = self.stat.get('err', 0) + 1
+                    logger.error("URL %s is not a Product page" % url)
+                except Exception, e:
+                    self.stat['err'] = self.stat.get('err', 0) + 1
+                    logger.error("URL %s error" % url)
+                    traceback.print_exc(file=sys.stdout)
+                self.queue.task_done()
+                #time.sleep(2)
+            except Queue.Empty, e:
+                self.state = 'FREE'
+                time.sleep(0.5)
+
+    def __str__(self):
+        return "[%s] W-%-3s [%4s/%-4s] %s" % (self.state, xstr(self.ident), self.stat.get('ok',0), self.stat.get('err', 0), self.proxy)
 
 
 class Monitor(Thread):
@@ -84,16 +105,16 @@ class Monitor(Thread):
             now = datetime.datetime.now()
             print "Elements in Queue:", self.queue.qsize(), "Active Threads:", len(live), "Time:", (now-started)
             for w in self.workers:
-                print "[%s] Worker with %s" % (" " if w.is_alive() else "X", w.proxy)
+                print w
 
 
-def run_all(iterator):
+def run_all(iterator, writer=write_to_db, num_threads=NUM_TORS):
     q = Queue.LifoQueue()
     for url in iterator:
         q.put(url)
 
     workers = []
-    for i in range(NUM_TORS):
+    for i in range(min([NUM_TORS, num_threads])):
         w = Worker(q, TOR_BASE_PORT + i)
         workers.append(w)
 
@@ -104,16 +125,15 @@ def run_all(iterator):
     mon.start()
 
     q.join()
+    for w in workers:
+         w.finish()
+         w.join()
     mon.finish()
+    mon.join()
 
 
 def run_one(url, writer):
-    q = Queue.LifoQueue()
-    q.put(url)
-    w = Worker(q, TOR_BASE_PORT + random.randint(0,NUM_TORS), writer)
-    w.run()
-    q.join()
-    return w.result
+    run_all([url, ], writer, 2)
 
 
 if __name__ == "__main__":
