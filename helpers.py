@@ -1,7 +1,7 @@
 import csv
 from settings import *
 import MySQLdb as MySQL
-from scrapers import AliProductScraper
+#from scrapers import AliProductScraper
 
 logger = logging.getLogger('ali')
 logger.setLevel(LOGLEVEL)
@@ -19,6 +19,9 @@ fieldnames = ["product_id",
               "variant_price",
               "variant_title",
               "shipping_cost"]
+
+def xstr(s):
+    return '' if s is None else str(s)
 
 
 class UnicodeDictWriter(csv.DictWriter):
@@ -72,11 +75,11 @@ def write_to_db(cur, rows):
     for r in rows:
         cur.execute("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), r)
 
-def save_variants(url, writer, proxy='localhost:9050'):
-    logger.info("Start process URL %s" % url)
-    scraper = AliProductScraper(url, proxy)
-    rows = scraper.get_variants()
-    writer(rows)
+#def save_variants(url, writer, proxy='localhost:9050'):
+#    logger.info("Start process URL %s" % url)
+#    scraper = AliProductScraper(url, proxy)
+#    rows = scraper.get_variants()
+#    writer(rows)
 
 
 

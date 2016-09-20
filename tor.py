@@ -28,13 +28,18 @@ class TorConnection(object):
         self.err_time = datetime.timedelta()
 
     def get_avgs(self):
-        s = None
-        e = None
+        s = 0
+        e = 0
         if self.success_counter > 0:
-            s = self.suc_time/self.success_counter
+            s = self.suc_time / self.success_counter
+            s = round(s.total_seconds(), 2)
         if self.error_counter > 0:
-            e = self.err_time/self.error_counter
-        return "%s/%s" % (s,e)
+            e = self.err_time / self.error_counter
+            e = round(e.total_seconds(), 2)
+        return "%04.2f/%04.2f" % (s, e)
+
+    def get_totals(self):
+        return "%05.1f/%05.1f" % (round(self.suc_time.total_seconds(),1), round(self.err_time.total_seconds(),1))
 
     def set_port(self, port):
         if port is None:
@@ -42,7 +47,7 @@ class TorConnection(object):
         else:
             self.proxy_port = port
         self.ctl_port = self.proxy_port - 934
-        print "Set Tor ports %s/%s" % (self.proxy_port, self.ctl_port)
+        #print "Set Tor ports %s/%s" % (self.proxy_port, self.ctl_port)
         self.tor_control = Controller.from_port(port=self.ctl_port)
 
     def next_port(self): 
@@ -90,8 +95,12 @@ class TorConnection(object):
     def change_identity_wait(self): 
         old_ip = self.ip()
         self.change_identity()
+        counter = 1
         while self.ip() == old_ip:
+            if counter > 6:
+                raise NoMoreRetry
             self.change_identity()
+            counter += 1
             time.sleep(0.5)
 
     def ip(self):
@@ -101,6 +110,6 @@ class TorConnection(object):
             return "n/a"
 
     def __str__(self):
-        return "TorConnection port=[%s/%s] OK=%s FAILURE=%s IDENTITY=%s AVG=%s" % (self.proxy_port, self.ctl_port, self.success_counter, self.error_counter, self.identity_counter, self.get_avgs())
+        return "TorConn(%s,%s) Requests [%4s/%-4s] ChIP=[%04d] AvgTime [%s] TotalTime [%s]" % (self.proxy_port, self.ctl_port, self.success_counter, self.error_counter, self.identity_counter, self.get_avgs(), self.get_totals())
        
 

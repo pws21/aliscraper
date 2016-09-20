@@ -3,6 +3,7 @@ import json
 import requests
 from BeautifulSoup import BeautifulSoup
 from settings import *
+from helpers import xstr
 
 class NotProductPage(Exception):
     pass
@@ -57,9 +58,6 @@ class AliShippingScraper(object):
         self.country = product_page.find('input', {'name':'countryCode'}).get('value')
         self.province = product_page.find('input', {'name':'provinceCode'}).get('value')
         self.city = product_page.find('input', {'name':'cityCode'}).get('value')
-
-        def xstr(s):
-            return '' if s is None else str(s)
 
         url = 'https://freight.aliexpress.com/ajaxFreightCalculateService.htm?callback=jQuery&f=d&productid=%s&count=1&currencyCode=%s&sendGoodsCountry=&country=%s&province=%s&city=%s&abVersion=1&_=1473792174531' % (product_id, currency, xstr(self.country), xstr(self.province), xstr(self.city))
         if proxy:

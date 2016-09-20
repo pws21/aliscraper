@@ -1,5 +1,5 @@
 from scrapers import ServiceUnavailable, NotProductPage, AliProductScraper
-from helpers import save_variants, write_to_db
+from helpers import write_to_db
 from flask import Flask, request, abort
 import json
 from threads import  get_variants_fast
