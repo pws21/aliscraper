@@ -5,6 +5,7 @@ from BeautifulSoup import BeautifulSoup
 from settings import *
 from helpers import xstr
 
+
 class NotProductPage(Exception):
     pass
 
@@ -73,10 +74,9 @@ class AliShippingScraper(object):
         else:
             return None
 
-def http_get(url, cookies=None, proxy='localhost:9050', headers={}):
-    response = requests.get(url, timeout=HTTP_TIMEOUT_SEC, cookies=cookies,
-                            #proxies=dict(http='socks5://%s' % proxy, https='socks5://%s' % proxy), 
-                            headers=headers)
+
+def http_get(url, cookies=None, headers={}):
+    response = requests.get(url, timeout=HTTP_TIMEOUT_SEC, cookies=cookies, headers=headers)
     return response.text
 
 
@@ -89,7 +89,7 @@ class AliProductScraper(object):
             'Accept-Encoding': 'gzip,deflate',
             'Accept-Language': 'en-US,en;q=0.8',
             'Cache-Control': 'max-age=0',
-            'Connection': 'keep-alive','user-agent': 'Googlebot/2.1'}
+            'Connection': 'keep-alive'}
         if proxy:
             response = proxy.get(self.url, cookies={'aep_usuc_f': 'region=US&site=glo&b_locale=en_US&c_tp=USD'}, headers=headers)
         else:

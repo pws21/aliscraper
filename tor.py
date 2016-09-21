@@ -6,6 +6,7 @@ from helpers import *
 import socks
 import requests
 import datetime
+import fake_useragent
 
 class NoMoreRetry(Exception):
     pass
@@ -19,6 +20,8 @@ class TorConnection(object):
         self.error_counter = 0
         self.suc_time = datetime.timedelta()
         self.err_time = datetime.timedelta()
+        self.ua = fake_useragent.UserAgent()
+
 
     def get_avgs(self):
         s = 0
@@ -59,6 +62,11 @@ class TorConnection(object):
         kwargs['proxies'] = dict(http='socks5://%s' % self.get_proxy(), https='socks5://%s' % self.get_proxy()) 
         kwargs['timeout'] = self.timeout
         starttime = datetime.datetime.now()
+        headers = kwargs.get('headers')
+        if headers and headers.get('User-Agent', None) is None:
+            headers['User-Agent'] = self.ua.random
+            kwargs['headers'] = headers
+
         try:
             resp = requests.get(*args, **kwargs)
             self.success_counter += 1
