@@ -4,7 +4,6 @@ from flask import Flask, request, abort
 import json
 from threads import  get_variants_fast
 from tor import TorConnection
-from settings import TOR_BASE_PORT
 
 app = Flask(__name__)
 

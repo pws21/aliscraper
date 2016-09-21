@@ -1,8 +1,5 @@
-import random
 import time
-import threading
 from threading import Thread
-from threading import active_count as threading_active_count
 import Queue
 from stem.control import Controller
 from stem import Signal

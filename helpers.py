@@ -119,12 +119,6 @@ def write_to_db(cur, rows):
     for r in rows:
         cur.execute("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), r)
 
-#def save_variants(url, writer, proxy='localhost:9050'):
-#    logger.info("Start process URL %s" % url)
-#    scraper = AliProductScraper(url, proxy)
-#    rows = scraper.get_variants()
-#    writer(rows)
-
 
 
 @db_wrap
