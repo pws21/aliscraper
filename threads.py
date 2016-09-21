@@ -108,33 +108,39 @@ class Monitor(Thread):
                 print w
 
 
-def run_all(iterator, writer=write_to_db, num_threads=NUM_TORS):
+def run_all(iterator, writer=write_to_db, num_threads=NUM_TORS, with_monitor=True):
     q = Queue.LifoQueue()
     for url in iterator:
         q.put(url)
 
     workers = []
     for i in range(min([NUM_TORS, num_threads])):
-        w = Worker(q, TOR_BASE_PORT + i)
+        w = Worker(q, TOR_BASE_PORT + i, writer=writer)
         workers.append(w)
 
     for w in workers:
         w.start()
 
-    mon = Monitor(q, workers)
-    mon.start()
+    if with_monitor:
+        mon = Monitor(q, workers)
+        mon.start()
 
     q.join()
     for w in workers:
          w.finish()
          w.join()
-    mon.finish()
-    mon.join()
+
+    if with_monitor:
+        mon.finish()
+        mon.join()
 
 
 def run_one(url, writer):
-    run_all([url, ], writer, 2)
+    tor = TorConnection(proxy_port=None)
+    rows = get_variants_fast(url, tor)
+    writer(rows)
+    #run_all([url, ], writer, 2)
 
 
-if __name__ == "__main__":
-    run_all(get_urls())
+#if __name__ == "__main__":
+#    run_all(get_urls())

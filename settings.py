@@ -1,4 +1,5 @@
 import logging
+import os
 
 DB = {"host":"localhost", "username": "ali", "password": "ali222", "dbname": "ali_upwork", "charset": "utf8", "variants_table": "tbl_aliexpress_variants"}
 
@@ -33,6 +34,8 @@ test_urls = ['https://www.aliexpress.com/item/2015-New-sneakers-women-outdoor-sp
 LOGFILE = 'log.log'
 LOGFMT = '%(asctime)s - [%(levelname)s] - %(message)s'
 LOGLEVEL = logging.INFO
+
+FILES_DIR=os.path.join(os.getcwd(), 'files')
 
 NUM_TORS = 10
 TOR_BASE_PORT = 9052
