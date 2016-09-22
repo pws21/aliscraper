@@ -23,7 +23,8 @@ def get_data():
 @app.route("/update_db")
 def update_db():
     data = get_data()
-    w = DBWriter()
+    ext_id = request.args.get('ext_id')
+    w = DBWriter(ext_id=ext_id)
     w.write(data)
     return json.dumps({"result": "OK"})
 
