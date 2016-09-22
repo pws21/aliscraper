@@ -92,7 +92,8 @@ def db_wrap(f):
             return res
         except:
             try:
-                conn.rollback()
+                if conn:
+                    conn.rollback()
             except:
                 pass
             raise
