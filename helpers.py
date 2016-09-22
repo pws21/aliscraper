@@ -76,6 +76,8 @@ def write_to_json(f, rows):
 def db_wrap(f):
     """Init/deinit Mysql connection and add cursor ass the first argument to function"""
     def func(*args, **kwargs):
+        conn = None
+        cur = None
         try:
             conn = MySQL.connect(host=DB['host'],
                                  user=DB['username'],
