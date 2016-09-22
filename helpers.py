@@ -6,8 +6,7 @@ import json
 
 logger = logging.getLogger('ali')
 logger.setLevel(LOGLEVEL)
-_fmt = logging.Formatter(LOGFMT)
-
+handler = None
 
 def set_log_file(fname):
     global logger
@@ -15,6 +14,7 @@ def set_log_file(fname):
     if handler:
         logger.removeHandler(handler)
     handler = logging.FileHandler(fname)
+    _fmt = logging.Formatter(LOGFMT)
     handler.setFormatter(_fmt)
     logger.addHandler(handler)
 
@@ -41,17 +41,19 @@ class FileWriter(object):
     def __init__(self, filename=None, ext='dat', write_method=None):
         self.filename = filename
         self.ext = ext
+        self.write_method = write_method
 
     def set_filename_for_rows(self, rows):
         if not self.filename:
             if not os.path.exists(FILES_DIR):
                 os.makedirs(FILES_DIR)
-            self.filename = "%s.%s" % (rows[0].get('product_id', 'None'), ext)
+            self.filename = "%s.%s" % (rows[0].get('product_id', 'None'), self.ext)
             self.filename = os.path.join(FILES_DIR, self.filename)
         
     def write(self, rows):
+        self.set_filename_for_rows(rows)
         f = open(self.filename, "wb")
-        write_method(f, rows)
+        self.write_method(f, rows)
         f.close()
         
 
@@ -114,9 +116,12 @@ class DBWriter(object):
         self.ext_id = ext_id
         
     def write(self, rows):
-        cols = ",".join(fieldnames)
-        vals = ",".join(map(lambda x: "%("+x+")s", fieldnames))
-        insert_all("insert into %s(%s, ext_id) values(%s, %s)" % (DB['variants_table'], cols, vals, self.ext_id), rows)
+        ff = fieldnames + ['ext_id']
+        for r in rows:
+            r['ext_id'] = self.ext_id
+        cols = ",".join(ff)
+        vals = ",".join(map(lambda x: "%("+x+")s", ff))
+        insert_all("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), rows)
 
 
 @db_wrap
