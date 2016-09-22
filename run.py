@@ -15,8 +15,7 @@ class MyParser(argparse.ArgumentParser):
 def run_with_args(ns):
     writer = None
     filename = None
-    if ns.log:
-        reset_log_file(ns.log)
+    set_log_file(ns.log or settings.LOGFILE)
     if ns.url and ns.filename:
         filename = ns.filename
     if ns.save_to == 'db':

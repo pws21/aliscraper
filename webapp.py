@@ -28,7 +28,7 @@ def sample():
     try:
         tor = TorConnection(proxy_port=None)
         data = get_variants_fast(url, tor)
-        print tor
+        #print tor
         return json.dumps(data, ensure_ascii=False)
     except NotProductPage:
         abort(422)
@@ -36,5 +36,5 @@ def sample():
         abort(503)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port=8080)
 
