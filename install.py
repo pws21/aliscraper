@@ -14,5 +14,5 @@ def drop_table(cur):
     cur.execute("drop table %s" % DB['variants_table'])
 
 if __name__ == "__main__":
-    #drop_table()
+    drop_table()
     create_table()

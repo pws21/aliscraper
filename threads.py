@@ -35,7 +35,7 @@ def get_variants_fast(url, tor):
     raise ServiceUnavailable
 
 class Worker(Thread):
-    def __init__(self, queue, proxy_port, writer=write_to_db):
+    def __init__(self, queue, proxy_port, writer):
         Thread.__init__(self)
         self.queue = queue
         self.proxy = TorConnection(proxy_port)
@@ -56,7 +56,7 @@ class Worker(Thread):
                 try:
                     self.state = 'WORK'
                     self.result = get_variants_hard(url, self.proxy)
-                    self.writer(self.result)
+                    self.writer.write(self.result)
                     logger.info("URL %s OK" % url)
                     self.stat['ok'] = self.stat.get('ok', 0) + 1
                     time.sleep(1)
@@ -105,7 +105,7 @@ class Monitor(Thread):
                 print w
 
 
-def run_all(iterator, writer=write_to_db, num_threads=NUM_TORS, with_monitor=True):
+def run_all(iterator, writer, num_threads=NUM_TORS, with_monitor=True):
     q = Queue.LifoQueue()
     for url in iterator:
         q.put(url)
@@ -135,7 +135,7 @@ def run_all(iterator, writer=write_to_db, num_threads=NUM_TORS, with_monitor=Tru
 def run_one(url, writer):
     tor = TorConnection(proxy_port=None)
     rows = get_variants_fast(url, tor)
-    writer(rows)
+    writer.write(rows)
     #run_all([url, ], writer, 2)
 
 

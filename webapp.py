@@ -1,5 +1,5 @@
 from scrapers import ServiceUnavailable, NotProductPage, AliProductScraper
-from helpers import write_to_db
+from helpers import DBWriter
 from flask import Flask, request, abort
 import json
 from threads import  get_variants_fast
@@ -13,7 +13,8 @@ def update_db():
     url = request.args.get('url')
     try:
         data = get_variants_fast(url, TorConnection(proxy_port=None))
-        write_to_db(data)
+        w = DBWriter()
+        w.write(data)
         return json.dumps({"result": "OK"})
     except NotProductPage:
         abort(422)

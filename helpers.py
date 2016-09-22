@@ -38,6 +38,25 @@ def safe_encode(val, charset):
          return None
      return val.encode(charset)
 
+
+class FileWriter(object):
+    def __init__(self, filename=None, ext='dat', write_method=None):
+        self.filename = filename
+        self.ext = ext
+
+    def set_filename_for_rows(self, rows):
+        if not self.filename:
+            if not os.path.exists(FILES_DIR):
+                os.makedirs(FILES_DIR)
+            self.filename = "%s.%s" % (rows[0].get('product_id', 'None'), ext)
+            self.filename = os.path.join(FILES_DIR, self.filename)
+        
+    def write(self, rows):
+        f = open(self.filename, "wb")
+        write_method(f, rows)
+        f.close()
+        
+
 class UnicodeDictWriter(csv.DictWriter):
     def writerow(self, rowdict):
         self.writer.writerow([safe_encode(s, "utf-8") for s in self._dict_to_list(rowdict)])
@@ -52,32 +71,6 @@ def write_to_csv(f, rows):
 
 def write_to_json(f, rows):
     f.write(json.dumps(rows))
-
-
-def get_file_writer(filename, fmt):
-    def fn(rows):
-        if filename:
-            fname = filename
-        elif len(rows) > 0:
-            if not os.path.exists(FILES_DIR):
-                os.makedirs(FILES_DIR)
-            fname = "%s.%s" % (rows[0].get('product_id', 'None'), fmt)
-            fname = os.path.join(FILES_DIR, fname)
-        else:
-            return
-        f = open(fname, "wb")
-        writer(f, rows)
-        f.close()        
-        
-    writer = None
-    if fmt == 'csv':
-        writer = write_to_csv
-    elif fmt == 'json':
-        writer = write_to_json
-    else:
-        raise ValueError
-
-    return fn
 
 
 def db_wrap(f):
@@ -113,12 +106,19 @@ def db_wrap(f):
     return func
 
 @db_wrap
-def write_to_db(cur, rows):
-    cols = ",".join(fieldnames)
-    vals = ",".join(map(lambda x: "%("+x+")s", fieldnames))
+def insert_all(cur, sql, rows):
     for r in rows:
-        cur.execute("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), r)
+        cur.execute(sql, r)
 
+
+class DBWriter(object):
+    def __init__(self, ext_id=None):
+        self.ext_id = ext_id
+        
+    def write(self, rows):
+        cols = ",".join(fieldnames)
+        vals = ",".join(map(lambda x: "%("+x+")s", fieldnames))
+        insert_all("insert into %s(%s, ext_id) values(%s, %s)" % (DB['variants_table'], cols, vals, self.ext_id), rows)
 
 
 @db_wrap

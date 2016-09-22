@@ -20,9 +20,11 @@ def run_with_args(ns):
     if ns.url and ns.filename:
         filename = ns.filename
     if ns.save_to == 'db':
-        writer = write_to_db
-    else:
-        writer = get_file_writer(filename, ns.save_to)
+        writer = DBWriter()
+    elif ns.save_to == 'csv':
+        writer = FileWriter(filename, 'csv', write_to_csv)
+    elif ns.save_to == 'json':
+        writer = FileWriter(filename, 'json', write_to_json)
 
     if ns.url:
         run_one(ns.url, writer=writer)

@@ -18,6 +18,7 @@ DDL = """create table if not exists %s(
                 variant_price decimal(10,2),
                 variant_title varchar(1000),
                 shipping_cost decimal(10,2),
+                ext_id bigint,
                 insert_dt TIMESTAMP DEFAULT NOW())""" % DB['variants_table']
 
 HTTP_TIMEOUT_SEC = 3
