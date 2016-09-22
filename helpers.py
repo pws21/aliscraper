@@ -7,11 +7,9 @@ import json
 logger = logging.getLogger('ali')
 logger.setLevel(LOGLEVEL)
 _fmt = logging.Formatter(LOGFMT)
-handler = logging.FileHandler(LOGFILE)
-handler.setFormatter(_fmt)
-logger.addHandler(handler)
 
-def reset_log_file(fname):
+
+def set_log_file(fname):
     global logger
     global handler
     if handler:
