@@ -1,7 +1,12 @@
 import logging
 import os
 
-DB = {"host":"localhost", "username": "ali", "password": "ali222", "dbname": "ali_upwork", "charset": "utf8", "variants_table": "tbl_aliexpress_variants"}
+DB = {"host":"localhost", 
+      "username": "ali", 
+      "password": "ali222", 
+      "dbname": "ali_upwork", 
+      "charset": "utf8", 
+      "variants_table": "tbl_aliexpress_variants"}
 
 DDL = """create table if not exists %s(
                 product_id bigint,
@@ -12,7 +17,8 @@ DDL = """create table if not exists %s(
                 variant_id varchar(255),
                 variant_price decimal(10,2),
                 variant_title varchar(1000),
-                shipping_cost decimal(10,2))""" % DB['variants_table']
+                shipping_cost decimal(10,2),
+                insert_dt TIMESTAMP DEFAULT NOW())""" % DB['variants_table']
 
 HTTP_TIMEOUT_SEC = 3
 
