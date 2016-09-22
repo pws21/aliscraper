@@ -82,6 +82,8 @@ def http_get(url, cookies=None, headers={}):
 
 class AliProductScraper(object):
     def __init__(self, url, proxy):
+        if not url:
+            raise ValueError
         self.url = url
         self.proxy = proxy
         #_tor.new_identity()

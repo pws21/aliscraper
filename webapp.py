@@ -8,32 +8,29 @@ from tor import TorConnection
 app = Flask(__name__)
 
 
-@app.route("/update_db")
-def update_db():
+def get_data():
     url = request.args.get('url')
     try:
-        data = get_variants_fast(url, TorConnection(proxy_port=None))
-        w = DBWriter()
-        w.write(data)
-        return json.dumps({"result": "OK"})
+        if not url:
+            raise NotProductPage
+        return get_variants_fast(url, TorConnection(proxy_port=None))
     except NotProductPage:
         abort(422)
     except ServiceUnavailable:
         abort(503)
+
+
+@app.route("/update_db")
+def update_db():
+    data = get_data()
+    w = DBWriter()
+    w.write(data)
+    return json.dumps({"result": "OK"})
 
 
 @app.route("/sample")
 def sample():
-    url = request.args.get('url')
-    try:
-        tor = TorConnection(proxy_port=None)
-        data = get_variants_fast(url, tor)
-        #print tor
-        return json.dumps(data, ensure_ascii=False)
-    except NotProductPage:
-        abort(422)
-    except ServiceUnavailable:
-        abort(503)
+    return json.dumps(get_data(), ensure_ascii=False)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=8080)
