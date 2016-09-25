@@ -9,6 +9,7 @@ DB = {"host":"localhost",
       "variants_table": "tbl_aliexpress_variants"}
 
 DDL = """create table if not exists %s(
+                id mediumint not null AUTO_INCREMENT,
                 product_id bigint,
                 product_title varchar(1000),
                 product_price varchar(100),
@@ -19,7 +20,8 @@ DDL = """create table if not exists %s(
                 variant_title varchar(1000),
                 shipping_cost decimal(10,2),
                 ext_id bigint,
-                insert_dt TIMESTAMP DEFAULT NOW())""" % DB['variants_table']
+                insert_dt TIMESTAMP DEFAULT NOW(), 
+                primary key (id))""" % DB['variants_table']
 
 HTTP_TIMEOUT_SEC = 3
 
