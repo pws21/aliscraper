@@ -24,7 +24,8 @@ def get_variants_hard(url, tor):
     raise ServiceUnavailable
 
 def get_variants_fast(url, tor):
-    tor.set_timeout(2)
+    if tor:
+        tor.set_timeout(2)
     for i in range(NUM_TORS):
         try:
             scraper = AliProductScraper(url, proxy=tor)
