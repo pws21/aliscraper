@@ -113,10 +113,25 @@ def insert_all(cur, sql, rows):
     for r in rows:
         cur.execute(sql, r)
 
+@db_wrap
+def create_variants_table(cur):
+    cur.execute(DDL)
+    cur.execute("create index ak1_%(variants_table)s on %(variants_table)s (product_id)" % DB)
+    cur.execute("create index ak2_%(variants_table)s on %(variants_table)s (insert_dt)" % DB)
+	cur.execute("alter table %(variants_table)s add constraint uk_%(variants_table)s unique (product_id, variant_id)" % DB)
+
+@db_wrap
+def table_exists(cur, schema_name, table_name):
+	cur.execute("SELECT count(*) FROM information_schema.tables "+
+	            "WHERE table_schema = %(schema_name)s AND table_name = %(table_name)s LIMIT 1", {"schema_name": schema_name, "table_name": table_name})
+	ret = cur.fetchone()
+	return ret != 0
 
 class DBWriter(object):
     def __init__(self, ext_id=None):
         self.ext_id = ext_id
+		if not table_exists(DB["db_name"], DB["variants_table"]):
+			create_variants_table()
         
     def write(self, rows):
         ff = fieldnames + ['ext_id']
