@@ -118,20 +118,20 @@ def create_variants_table(cur):
     cur.execute(DDL)
     cur.execute("create index ak1_%(variants_table)s on %(variants_table)s (product_id)" % DB)
     cur.execute("create index ak2_%(variants_table)s on %(variants_table)s (insert_dt)" % DB)
-	cur.execute("alter table %(variants_table)s add constraint uk_%(variants_table)s unique (product_id, variant_id)" % DB)
+    cur.execute("alter table %(variants_table)s add constraint uk_%(variants_table)s unique (product_id, variant_id)" % DB)
 
 @db_wrap
 def table_exists(cur, schema_name, table_name):
-	cur.execute("SELECT count(*) FROM information_schema.tables "+
-	            "WHERE table_schema = %(schema_name)s AND table_name = %(table_name)s LIMIT 1", {"schema_name": schema_name, "table_name": table_name})
-	ret = cur.fetchone()
-	return ret != 0
+    cur.execute("SELECT count(*) FROM information_schema.tables "+
+	        "WHERE table_schema = %(schema_name)s AND table_name = %(table_name)s LIMIT 1", {"schema_name": schema_name, "table_name": table_name})
+    ret = cur.fetchone()
+    return ret[0] > 0
 
 class DBWriter(object):
     def __init__(self, ext_id=None):
         self.ext_id = ext_id
-		if not table_exists(DB["db_name"], DB["variants_table"]):
-			create_variants_table()
+        if not table_exists(DB["dbname"], DB["variants_table"]):
+            create_variants_table()
         
     def write(self, rows):
         ff = fieldnames + ['ext_id']
@@ -139,13 +139,14 @@ class DBWriter(object):
             r['ext_id'] = self.ext_id
         cols = ",".join(ff)
         vals = ",".join(map(lambda x: "%("+x+")s", ff))
-		upd = ",".join(["%s=values(%s)" % (f,f) for f in ff])
-        insert_all("insert into %s(%s) values(%s) "+
-		           "on duplicate key update %s, update_dt=now()" % (DB['variants_table'], cols, vals, upd), rows)
+        upd = ",".join(["%s=values(%s)" % (f,f) for f in ff])
+        insert_all("insert into %s(%s) values(%s) on duplicate key update %s, update_dt=now()" % (DB['variants_table'], cols, vals, upd), rows)
 
 
 @db_wrap
 def get_urls(cur):
+    urls = []
     cur.execute("Select DISTINCT product_url from %s" % DB['variants_table'])
-    for url in cur:
-		yield url
+    for url in cur.fetchall():
+        urls.append(url[0])
+    return urls
