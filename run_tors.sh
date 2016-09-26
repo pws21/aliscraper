@@ -21,7 +21,7 @@ do
 
 	echo "Running: tor --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword \"\" --ControlPort $control_port --PidFile tor$i.pid --SocksPort $socks_port --DataDirectory data/tor$i"
 
-	tor  --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword "16:694F2421A51640E760D36519215CF6FAA8F778648D22E2D28536DF0E85" --ControlPort $control_port --PidFile tor$i.pid --SocksPort $socks_port --DataDirectory data/tor$i
+	tor --MaxCircuitDirtiness 120 --RunAsDaemon 1 --CookieAuthentication 0 --HashedControlPassword "16:694F2421A51640E760D36519215CF6FAA8F778648D22E2D28536DF0E85" --ControlPort $control_port --PidFile tor$i.pid --SocksPort $socks_port --DataDirectory data/tor$i
 
 done
 
