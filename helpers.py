@@ -124,10 +124,13 @@ class DBWriter(object):
             r['ext_id'] = self.ext_id
         cols = ",".join(ff)
         vals = ",".join(map(lambda x: "%("+x+")s", ff))
-        insert_all("insert into %s(%s) values(%s)" % (DB['variants_table'], cols, vals), rows)
+		upd = ",".join(["%s=values(%s)" % (f,f) for f in ff])
+        insert_all("insert into %s(%s) values(%s) "+
+		           "on duplicate key update %s, update_dt=now()" % (DB['variants_table'], cols, vals, upd), rows)
 
 
 @db_wrap
 def get_urls(cur):
-    #TODO: write SELECT from table with urls
-    return test_urls * 10
+    cur.execute("Select DISTINCT product_url from %s" % DB['variants_table'])
+    for url in cur:
+		yield url

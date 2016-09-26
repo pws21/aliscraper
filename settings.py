@@ -21,6 +21,7 @@ DDL = """create table if not exists %s(
                 shipping_cost decimal(10,2),
                 ext_id bigint,
                 insert_dt TIMESTAMP DEFAULT NOW(), 
+				update_dt TIMESTAMP DEFAULT NOW(),
                 primary key (id))""" % DB['variants_table']
 
 HTTP_TIMEOUT_SEC = 3
