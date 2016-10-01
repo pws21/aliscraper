@@ -31,8 +31,9 @@ def get_variants_fast(url, tor):
             scraper = AliProductScraper(url, proxy=tor)
             return scraper.get_variants()
         except (requests.ReadTimeout, socks.GeneralProxyError, ServiceUnavailable, requests.ConnectionError) as e:
-            tor.change_identity()
-            tor.next_port()
+            if tor:
+                tor.change_identity()
+                tor.next_port()
     raise ServiceUnavailable
 
 class Worker(Thread):
