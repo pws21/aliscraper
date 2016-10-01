@@ -13,7 +13,7 @@ def get_data():
     try:
         if not url:
             raise NotProductPage
-        return get_variants_fast(url,None)#, TorConnection(proxy_port=None))
+        return get_variants_fast(url, TorConnection(proxy_port=None))
     except NotProductPage:
         abort(422)
     except ServiceUnavailable:
