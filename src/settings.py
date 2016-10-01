@@ -41,7 +41,7 @@ test_urls = ['https://www.aliexpress.com/item/2015-New-sneakers-women-outdoor-sp
             'https://www.aliexpress.com/item/Original-Rock-Luxury-Zircon-Stereo-Headphones-Headset-3-5mm-In-Ear-Earphone-Earbuds-For-IPhone-Samsung/32511135694.html?spm=2114.01010108.3.119.Hynh4C&ws_ab_test=searchweb201556_0,searchweb201602_3_10057_10056_10065_10068_10055_10054_10069_10059_10058_10073_10017_10070_10060_10061_10052_10062_10053_10050_10051,searchweb201603_4&btsid=67dc8c69-1524-46d5-85d9-8c83f28e9e1c',
 ]
 
-LOGFILE = os.path.join(os.getcwd(), 'log.log')
+LOGFILE = '/var/log/aliscraper/log.log'
 LOGFMT = '%(asctime)s - [%(levelname)s] - %(message)s'
 LOGLEVEL = logging.INFO
 
