@@ -1,8 +1,9 @@
 import sys
 import os
 #import pwd
-path =  '/home/aliscraper/aliscraper'
-sys.path.insert(0, path)
+cwd = os.path.dirname(os.path.abspath(__file__))
+src_path =  os.path.join(cwd, 'src')
+sys.path.insert(0, src_path)
 os.chdir(path)
 
 #print('mod_wsgi.process_group', environ['mod_wsgi.process_group'])
