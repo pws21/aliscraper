@@ -18,4 +18,4 @@ done
 cd /etc/init.d
 wget -O tor https://gist.githubusercontent.com/7adietri/9122199/raw/4ed71b894eddbdfb0e241fa06bb583a19f0ccc89/tor
 chmod +x tor
-
+sed -i 's|/var/run/tor|/var/lib/tor|g' /etc/init.d/tor
